@@ -1,0 +1,116 @@
+openapi: 3.0.3
+
+info:
+  title: Car Booking Service API
+  description: Микросервис бронирования автомобилей в каршеринге
+  version: v1
+
+servers:
+  - url: https://test.com
+    description: Тестовый хост
+  - url: https://prod.com
+    description: Промышленный хост
+
+tags:
+  - name: TEST
+    description: Тестовая группа
+  - name: TEST_2
+    description: Тестовая группа 2
+
+paths:
+  /cars/{carId}/booking:
+    post:
+      summary: Забронировать автомобиль
+      description: Создаёт бронь на автомобиль для указанного пользователя, если авто доступно
+      operationId: bookCar
+      tags:
+        - TEST
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          description: Уникальный идентификатор автомобиля
+          schema:
+            type: string
+            format: uuid
+
+      requestBody:
+        required: true
+        description: Данные пользователя, оформляющего бронь
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+
+      responses:
+        201:
+          description: Авто успешно забронировано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+
+        404:
+          description: Авто не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Car not found
+
+        409:
+          description: Авто уже забронировано другим пользователем
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Car already booked
+
+components:
+  schemas:
+
+    BookingRequest:
+      type: object
+      description: Тело запроса на бронирование автомобиля
+      required:
+        - userId
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: Идентификатор пользователя, который бронирует авто
+
+
+    BookingResponse:
+      type: object
+      description: Информация об успешно созданной брони
+      required:
+        - bookingId
+        - userId
+        - carId
+      properties:
+        bookingId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор созданной брони
+        userId:
+          type: string
+          format: uuid
+          description: Идентификатор пользователя, который бронирует авто
+        carId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор автомобиля
+
+    ErrorResponse:
+      type: object
+      description: Стандартная структура ошибки
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Человеко-читаемое описание ошибки
+          
