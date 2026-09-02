@@ -19,19 +19,19 @@ gate -> book : Бронирование авто
 activate book
 
 alt Авто доступно
-    book -> db : Обновление статуса
-    activate db
-    
-    db --> book : Статус обновлён
-    deactivate db
+	book -> db : Обновление статуса
+	activate db
 
-    book -> que : Отправка события о смене статуса
-    activate que
+	db --> book : Статус обновлён
+	deactivate db
 
-    book --> gate : 201 Created
+	book -> que : Отправка события о смене статуса
+	activate que
+
+book --> gate : 201 Created
 else Авто недоступно
-    book --> gate: 409 Conflict
-    deactivate book
+	book --> gate: 409 Conflict
+	deactivate book
 end
 
 gate --> user: ответ
