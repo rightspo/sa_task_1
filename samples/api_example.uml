@@ -1,0 +1,40 @@
+@startuml BookCar
+title Бронирование автомобиля
+
+actor "Пользователь" as user
+participant "API Gateway" as gate
+
+box "Car Booking Service"
+  participant "Booking Service" as book
+  database "Booking DB" as db
+end box
+
+queue "Status Queue" as que
+
+activate user
+user -> gate : POST /cars/{carId}/booking
+activate gate
+
+gate -> book : Бронирование авто
+activate book
+
+alt Авто доступно
+    book -> db : Обновление статуса
+    activate db
+    
+    db --> book : Статус обновлён
+    deactivate db
+
+    book -> que : Отправка события о смене статуса
+    activate que
+
+    book --> gate : 201 Created
+else Авто недоступно
+    book --> gate: 409 Conflict
+    deactivate book
+end
+
+gate --> user: ответ
+deactivate gate
+
+@enduml
